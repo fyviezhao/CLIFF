@@ -145,7 +145,14 @@ def main(args):
         detection_all = []
         
         # mmtracking procedure
-        imgs = mmcv.VideoReader(args.input_path)
+        if args.input_type == 'image':
+            imgs = [mmcv.imread(args.input_path)]
+        elif args.input_type == 'folder':
+            imgs = [mmcv.imread(os.path.join(args.input_path,'imgs',img_name)) for img_name in sorted(os.listdir(args.input_path + '/imgs'))]
+        elif args.input_type == 'video':
+            imgs = mmcv.VideoReader(args.input_path)
+        else:
+            raise NotImplementedError(f'Expect args.input_type be one of image/folder/video, but got {args.input_type}.')
         prog_bar = mmcv.ProgressBar(len(imgs))
 
         for i, img in enumerate(imgs):
@@ -194,7 +201,14 @@ def main(args):
         detection_all = []
         
         # mmdetection procedure
-        imgs = mmcv.VideoReader(args.input_path)
+        if args.input_type == 'image':
+            imgs = [mmcv.imread(args.input_path)]
+        elif args.input_type == 'folder':
+            imgs = [mmcv.imread(os.path.join(args.input_path,'imgs',img_name)) for img_name in sorted(os.listdir(args.input_path + '/imgs'))]
+        elif args.input_type == 'video':
+            imgs = mmcv.VideoReader(args.input_path)
+        else:
+            raise NotImplementedError(f'Expect args.input_type be one of image/folder/video, but got {args.input_type}.')
         prog_bar = mmcv.ProgressBar(len(imgs))
         
         # only take-out person (id=0)

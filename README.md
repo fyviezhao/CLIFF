@@ -24,15 +24,32 @@ This repo is highly built on the official [CLIFF](https://github.com/huawei-noah
 
 ## Preparation
 ```bash
-conda create -n cliff python=3.10
-pip install -r requirements.txt
+$ conda create -n cliff python=3.8
+$ conda activate cliff
+$ conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
+$ pip install opencv-python matplotlib tqdm trimesh pyrender yacs smplx torchgeometry
 ```
 
 1. Download [the SMPL models](https://smpl.is.tue.mpg.de) for rendering the reconstructed meshes
 2. Download the pretrained checkpoints to run the demo [[Google Drive](
     https://drive.google.com/drive/folders/1EmSZwaDULhT9m1VvH7YOpCXwBWgYrgwP?usp=sharing)]
-3. Install MMDetection and download [the pretrained checkpoints](https://github.com/open-mmlab/mmdetection/tree/master/configs/yolox)
+3. Install MMDetection and download [the pretrained checkpoints](https://github.com/open-mmlab/mmdetection/tree/master/configs/yolox):
+    ```bash
+    $ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11.0/index.html
+    $ git clone https://github.com/open-mmlab/mmdetection.git
+    $ cd mmdetection
+    $ pip install -v -e .
+    ```
 4. Install MMTracking and download [the pretrained checkpoints](https://github.com/open-mmlab/mmtracking/tree/master/configs/mot/bytetrack)
+    ```bash
+    $ git clone https://github.com/open-mmlab/mmtracking.git
+    $ cd mmtracking
+    $ pip install -r requirements/build.txt
+    $ pip install -v -e .
+    $ pip install git+https://github.com/JonathonLuiten/TrackEval.git
+    $ pip install git+https://github.com/lvis-dataset/lvis-api.git
+    $ pip install git+https://github.com/TAO-Dataset/tao.git
+    ```
 
 Finally put these data following the directory structure as below:
 ```
@@ -63,25 +80,45 @@ Run the following command to test CLIFF on a single-person video:
 ```
 python demo.py --ckpt data/ckpt/hr48-PA43.0_MJE69.0_MVE81.2_3dpw.pt \
                --backbone hr48 \
-               --input_path test_samples/01e222117f63f874010370037f551497ac_258.mp4 \
+               --input_path data/test_samples/downtown_runForBus_00_3dpw.mp4 \
                --input_type video \
                --save_results \
                --make_video \
                --frame_rate 30
 ```
-### Multi-person
-Use the `--multi` flag to support multi-person tracking, `--infill` flag to support motion infill, `--smooth` flag to support motion smooth. Run the following command to test CLIFF on a multi-person video with post-processing:
+
+Run the following command to test CLIFF on an folder that contains single-person images:
 ```
 python demo.py --ckpt data/ckpt/hr48-PA43.0_MJE69.0_MVE81.2_3dpw.pt \
                --backbone hr48 \
-               --input_path test_samples/62883594000000000102c16c.mp4 \
+               --input_path data/test_samples/lspet_samples \
+               --input_type folder \
+               --save_results
+```
+
+Run the following command to test CLIFF on a single-person image:
+```
+python demo.py --ckpt data/ckpt/hr48-PA43.0_MJE69.0_MVE81.2_3dpw.pt \
+               --backbone hr48 \
+               --input_path data/test_samples/lspet_samples/imgs/im00005.png \
+               --input_type image \
+               --save_results
+```
+
+**NOTE**: If you run into this `RuntimeError: Subtraction, the `-` operator, with a bool tensor is not supported. If you are trying to invert a mask, use the ~ or logical_not() operator instead.`, please refer to this [link](https://stackoverflow.com/questions/65637222/runtimeerror-subtraction-the-operator-with-a-bool-tensor-is-not-supported) for solution.
+s
+### Multi-person [TODO: Need More Debugging]
+Use the `--multi` flag to support multi-person tracking, `--infill` flag to support motion infill, `--smooth` flag to support motion smooth (require to install [mmhuman3d](https://github.com/open-mmlab/mmhuman3d)). Run the following command to test CLIFF on a multi-person video with post-processing:
+```
+python demo.py --ckpt data/ckpt/hr48-PA43.0_MJE69.0_MVE81.2_3dpw.pt \
+               --backbone hr48 \
+               --input_path data/test_samples/downtown_runForBus_00_3dpw.mp4 \
                --input_type video \
-               --multi \
-               --infill \
-               --smooth \
                --save_results \
                --make_video \
-               --frame_rate 30
+               --frame_rate 30 \
+               --multi \
+               --infill
 ```
 
 ## SMPLify Fitting
